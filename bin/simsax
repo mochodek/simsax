@@ -1,0 +1,109 @@
+
+import string
+import pandas as pd
+import numpy as np
+import argparse
+import os
+
+
+from simsax.projects import load_backlog
+from simsax.alignment.model import ProjectSequence
+from simsax.alignment.finders import calculate_project_alignment, create_sax_signature, find_motifs
+from simsax.alignment.calculators import AlignmentsCoverageCalculator
+
+from sax.pysax import SAXModel
+
+if __name__ == '__main__':
+
+    # Parse input parameters
+    parser = argparse.ArgumentParser()
+    parser.add_argument("dir_path", help="A directory where the input files are stored")
+    parser.add_argument("csv_file_a", help="A csv input filename with a backlog for the first project")
+    parser.add_argument("csv_file_b", help="A csv input filename with a backlog for the second project")
+    parser.add_argument("ts_column_name", help="A column name for the time series to be considered")
+    parser.add_argument("n", help="Window length", type=int)
+    parser.add_argument("w", help="Word length", type=int)
+    parser.add_argument("a", help="Alphabet size", type=int)
+   
+
+    args = vars(parser.parse_args())
+
+    dir_path = args['dir_path']
+    if not dir_path.endswith(os.sep):
+        dir_path += os.sep
+    csv_file_a = args['csv_file_a']
+    csv_file_b = args['csv_file_b']
+    column_name = args['ts_column_name']
+    n = args['n']
+    w = args['w']
+    a = args['a']
+
+
+    ## 1. Load the defect backlog
+
+    project_a = load_backlog(backlogs_folder=dir_path, file_name=csv_file_a, 
+                                source='Unknown', dev_type='unknown')
+
+    project_b = load_backlog(backlogs_folder=dir_path, file_name=csv_file_b, 
+                                source='Unknown', dev_type='unknown')
+
+    project_a_seq = ProjectSequence(project_a, get_sequence=lambda x: x.backlog[column_name])
+    project_b_seq = ProjectSequence(project_b, get_sequence=lambda x: x.backlog[column_name])
+
+    ## 2. Create SAX transformer
+
+    window = n
+    nbins = w
+    alphabet = a
+    alphabet = string.ascii_lowercase[:alphabet]
+
+    sax = SAXModel(
+            window=window,
+            nbins=nbins,
+            alphabet=alphabet,
+            epsilon=0.05)
+
+    ## 3. Transform sequences with SAX
+
+    project_a_seq.transform_project_dna(sax)
+    project_b_seq.transform_project_dna(sax)
+
+    ## 4. Find alignments and motifs in time series
+
+    # score thresholds defines what % of symbols between the compared windows has to match to call them similar
+    score_threshold = 1.0 
+
+    # it is a minimal distance between windows to treat them as different ones 
+    min_dist = 1
+
+    # we find similar windows between both time series
+    alignments_between = calculate_project_alignment(project_a_seq, project_b_seq, 
+                                                    create_sax_signature(sax), 
+                                                    min_dist ,score_threshold)
+
+    # we find internal similarities within each of the time series
+    project_a_within = calculate_project_alignment(project_a_seq, project_a_seq, 
+                                                create_sax_signature(sax), 
+                                                min_dist,score_threshold)
+    project_b_within = calculate_project_alignment(project_b_seq, project_b_seq, 
+                                                create_sax_signature(sax), 
+                                                min_dist,score_threshold)
+
+
+    # get motifs
+    motifs_between = find_motifs(alignments_between)
+    motifs_project_a_within = find_motifs(project_a_within)
+    motifs_project_b_within = find_motifs(project_b_within)
+
+    ## 5. Calculate SimSAX
+
+    calc = AlignmentsCoverageCalculator(alignments_between, 
+                                        {project_a_seq.project:project_a_within, 
+                                        project_b_seq.project:project_b_within})
+
+    calc.calculate_weeks()
+
+    print("SimSAX_{},{},{}(A, B) = ({:.2f}, {:.2f})".format(window, nbins, len(alphabet), 
+                                                calc.metrics[project_a]['between_coverage'],
+                                                calc.metrics[project_b]['between_coverage']
+                                                ))
