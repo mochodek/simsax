@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='simsax',
-      version='0.1',
+      version='0.1.1',
       description='Python SimSAX',
       url='https://github.com/mochodek/simsax',
       author='',

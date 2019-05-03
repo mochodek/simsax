@@ -4,6 +4,10 @@ import numpy as np
 import math
 import pandas as pd
 
+from mpl_toolkits import mplot3d
+import matplotlib.gridspec as gridspec
+from matplotlib import colors as clrs
+
 
 def remove_duplicate_motifs(combined):
     to_remove = []
@@ -314,4 +318,108 @@ def plot_comparisons_motif(figsize, project_a_seq, project_b_seq, title_a, title
                             axis_x_dates=True, ytick_interval=10,
                             title =title_b,  between_color = "lightgreen")
     return fig
-    
+
+def plot_sequence_with_anomalies(project_seq, project_anomaly_seq):
+    figsize = (15, 5)
+    xtick_interval = 20
+    fig = plt.figure(figsize=figsize)
+
+    sequence_a = project_seq.sequence
+
+    ax = plt.subplot(211)
+    ax.grid(color='lightgray', linestyle='-', linewidth=1)
+    ax.set_title("Project")
+    ax.set_xlabel("week")
+    ax.set_ylabel("#defects")
+    ax.set_yticks([])
+
+    plt.xticks([x for x in range(0, len(sequence_a), xtick_interval)], 
+                  [x for x in range(0, len(sequence_a), xtick_interval)])
+
+    ax.plot(sequence_a, linewidth=2, color="black")
+
+    ax = plt.subplot(212)
+    sequence_b = project_anomaly_seq.sequence
+    ax.grid(color='lightgray', linestyle='-', linewidth=1)
+    ax.set_title("Project with anomalies")
+    ax.set_xlabel("week")
+    ax.set_ylabel("#defects")
+    ax.set_yticks([])
+
+    plt.xticks([x for x in range(0, len(sequence_b), xtick_interval)], 
+                  [x for x in range(0, len(sequence_b), xtick_interval)])
+
+    ax.plot(sequence_a, linewidth=2, color="lightgray")
+    ax.plot(sequence_b, linewidth=2, color="darkred")
+
+    plt.tight_layout()
+    plt.show()
+    plt.close()
+
+def plot_simulation_3d(simulation_data):
+    fig = plt.figure(figsize=(12,16))
+
+    gs = gridspec.GridSpec(3, 2, height_ratios=[2, 1, 1])
+    gs.update(hspace=0.25)
+
+    ax = plt.subplot(gs[0, :], projection='3d')
+
+    zdata = simulation_data['fscore']
+    xdata = simulation_data['nbins']
+    ydata = simulation_data['window']
+    cdata = simulation_data['alphabet'].astype('int')
+
+    cmap = plt.cm.Blues(np.linspace(0,1,50))
+    cmap = clrs.ListedColormap(cmap[20:40,:-1])
+
+    ax.scatter3D(xdata, ydata, zdata, c=cdata, cmap=cmap, depthshade=True);
+
+    ax.set_xlabel('word length (w)')
+    ax.set_ylabel('window length (n)')
+    ax.set_zlabel('F-score')
+
+    ax.set_xticks(np.arange(0, 66, 4))
+    ax.set_yticks([4, 8, 16, 32, 64], minor=False)
+    ax.set_yticks(np.arange(4,64,1), minor=True)
+
+    ax.set_xlim(4, 64)
+
+    fig.colorbar(ax.get_children()[1], label='alphabet size (a)', 
+                 pad=0.0, orientation="vertical",
+                 fraction=0.02, ticks=np.arange(4,21,1))
+
+    boxprops = dict(linestyle='-', linewidth=1, color='k')
+    medianprops = dict(linestyle='-', linewidth=4, color='black')
+    flierprops = dict(marker='o', markerfacecolor='white', markersize=2,
+                      linestyle='none')
+
+    ax = plt.subplot(gs[1,0])
+    bp = simulation_data.boxplot(ax=ax, column=['fscore'], by=['window'], showfliers=True,
+                                boxprops=boxprops,
+                                medianprops=medianprops, flierprops=flierprops, patch_artist=True)
+    plt.suptitle('')
+    ax.set_title(r'F-score by window length ($n$)')
+    ax.set_xlabel('window length (n)')
+    ax.set_ylabel('F-score')
+
+
+    ax = plt.subplot(gs[1,1])
+    simulation_data.boxplot(ax=ax, column=['fscore'], by=['alphabet'], showfliers=True,
+                           boxprops=boxprops,
+                                medianprops=medianprops, flierprops=flierprops, patch_artist=True)
+    plt.suptitle('')
+    ax.set_title(r'F-score by alphabet size ($a$)')
+    ax.set_xlabel('alphabet size (a)')
+    ax.set_ylabel('F-score')
+
+    ax = plt.subplot(gs[2, :])
+    simulation_data.boxplot(ax=ax, column=['fscore'], by=['nbins'], showfliers=True,
+                           boxprops=boxprops,
+                                medianprops=medianprops, flierprops=flierprops, patch_artist=True)
+    plt.suptitle('')
+    ax.set_title(r'F-score by word length ($w$)')
+    ax.set_xlabel('word length (w)')
+    ax.set_ylabel('F-score')
+
+    plt.show()
+    plt.close()
