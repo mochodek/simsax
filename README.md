@@ -11,7 +11,7 @@ cd simsax
 pip install -e .
 ```
 
-You can go through the provided Jupyter Notebooks to learn how to use the SimSAX calculator and run simulation of the meausure parameters n, w, a. To run the calculator you need to have two CSV files containing time series for two projects (see the data-examples folder) and run simsax tool. The tool takes the following parameters:
+You can go through the provided Jupyter Notebooks to learn how to use the SimSAX calculator and run simulation of the meausure parameters n, w, a. To run the calculator you need to have two CSV files containing time series for two projects (see the data-examples folder) and run the simsax tool. The tool takes the following parameters:
 * A directory where the input files are stored
 * A csv input filename with a backlog for the first project
 * A csv input filename with a backlog for the second project
