@@ -1,6 +1,16 @@
 # Similarity-based on Symbolic Aggregate approXimation (SimSAX)
 SimSAX: A Measure of Project Similarity Based on Symbolic Approximation Method and Software Defect Inflow
 
+Cite:
+```
+@article{ochodek2019simsax,
+  title={{SimSAX}: A Measure of Project Similarity Based on Symbolic Approximation Method and Software Defect Inflow},
+  author={Ochodek, Miros\'{l}aw and Staron, Miroslaw and Meding, Wilhelm},
+  journal={Information and Software Technology},
+  doi={10.1016/j.infsof.2019.06.003}
+}
+```
+
 ## Installation
 
 You can use pip to install the package once it is cloned:
