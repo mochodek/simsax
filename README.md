@@ -7,7 +7,10 @@ Cite:
   title={{SimSAX}: A Measure of Project Similarity Based on Symbolic Approximation Method and Software Defect Inflow},
   author={Ochodek, Miros{\l}aw and Staron, Miroslaw and Meding, Wilhelm},
   journal={Information and Software Technology},
-  doi={10.1016/j.infsof.2019.06.003}
+  issn = {0950-5849},
+  doi={https://doi.org/10.1016/j.infsof.2019.06.003},
+  url={http://www.sciencedirect.com/science/article/pii/S0950584919301363},
+  year={2019}
 }
 ```
 
