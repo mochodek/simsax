@@ -10,6 +10,8 @@ Cite:
   issn = {0950-5849},
   doi={https://doi.org/10.1016/j.infsof.2019.06.003},
   url={http://www.sciencedirect.com/science/article/pii/S0950584919301363},
+  volume = {115},
+  pages = {131-147},
   year={2019}
 }
 ```
