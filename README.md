@@ -1,6 +1,8 @@
 # Similarity-based on Symbolic Aggregate approXimation (SimSAX)
 SimSAX: A Measure of Project Similarity Based on Symbolic Approximation Method and Software Defect Inflow
 
+[![DOI](https://zenodo.org/badge/184040934.svg)](https://zenodo.org/badge/latestdoi/184040934)
+
 Cite:
 ```
 @article{ochodek2019simsax,
